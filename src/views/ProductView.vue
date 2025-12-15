@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { useProductStore } from "@/stores/product/product.store";
-import type { Product } from "@/stores/product/product.types";
+import type { OptionItem, Product } from "@/stores/product/product.types";
 import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
 import SecondaryButton from "@/components/common/buttons/SecondaryButton.vue";
 const route = useRoute();
@@ -10,16 +10,20 @@ const productStore = useProductStore();
 
 const productId = Number(route.params.id);
 
-const product: Product = computed(() => productStore.getProductById(productId));
+const product = computed<Product | undefined>(() =>
+  productStore.getProductById(productId)
+);
 
-function increase(item) {
-  if (item.max && item.quantity >= item.max) return;
-  item.quantity++;
+function increase(item: OptionItem) {
+  if (item.type === "quantity") {
+    if (item.max && item.quantity >= item.max) return;
+    item.quantity++;
+  }
 }
 
-function decrease(item) {
-  if (item.quantity > 0) {
-    item.quantity--;
+function decrease(item: OptionItem) {
+  if (item.type === "quantity") {
+    if (item.quantity > 0) item.quantity--;
   }
 }
 
@@ -38,7 +42,8 @@ function goBack() {
 <template>
   <div id="cardapio">
     <div
-      v-for="(category, cIndex) in product.options"
+      <div
+      v-for="(category, cIndex) in product?.options || []"
       :key="cIndex"
       id="listar"
     >
@@ -63,7 +68,7 @@ function goBack() {
 
           <button
             @click="increase(item)"
-            :disabled="item.max && item.quantity === item.max"
+            :disabled="Boolean(item.max && item.quantity === item.max)"
           >
             +
           </button>

@@ -124,7 +124,7 @@ export const useProductStore = defineStore("product", {
   getters: {
     getProductById: (state) => {
       return (id: number): Product | undefined =>
-        state.products.find((p) => p.id === id);
+        state.products.find((p) => p.id === id) as Product | undefined;
     },
   },
 

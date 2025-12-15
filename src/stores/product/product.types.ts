@@ -1,3 +1,47 @@
+// src/types/product.ts
+
+/* =======================
+ * ITEM BASE
+ * ======================= */
+export interface BaseItem {
+  name: string;
+  price: number;
+  type: "checkbox" | "quantity";
+}
+
+/* =======================
+ * ITEM CHECKBOX
+ * ======================= */
+export interface CheckboxItem extends BaseItem {
+  type: "checkbox";
+  checked: boolean;
+}
+
+/* =======================
+ * ITEM QUANTITY
+ * ======================= */
+export interface QuantityItem extends BaseItem {
+  type: "quantity";
+  quantity: number;
+  max: number;
+}
+
+/* =======================
+ * UNIÃO DOS ITENS
+ * ======================= */
+export type OptionItem = CheckboxItem | QuantityItem;
+
+/* =======================
+ * OPÇÕES DO PRODUTO
+ * ======================= */
+export interface ProductOption {
+  categoryName: string;
+  items: OptionItem[];
+}
+
+/* =======================
+ * PRODUTO
+ * ======================= */
 export interface Product {
   id: number;
   name: string;
@@ -6,12 +50,9 @@ export interface Product {
   options: ProductOption[];
 }
 
-export interface ProductOption {
-  categoryName: string;
-  items: ProductItem[];
-}
-
-export interface ProductItem {
-  name: string;
-  price: number;
+/* =======================
+ * STORE STATE (PINIA)
+ * ======================= */
+export interface ProductState {
+  products: Product[];
 }
