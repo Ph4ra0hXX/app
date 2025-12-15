@@ -2,7 +2,7 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { useProductStore } from "@/stores/product/product.store";
-import type { Product } from "@/types/product";
+import type { Product } from "@/stores/product/product.types";
 import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
 import SecondaryButton from "@/components/common/buttons/SecondaryButton.vue";
 const route = useRoute();
