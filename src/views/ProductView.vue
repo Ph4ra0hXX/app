@@ -5,14 +5,26 @@ import { useProductStore } from "@/stores/product/product.store";
 import type { OptionItem, Product } from "@/stores/product/product.types";
 import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
 import SecondaryButton from "@/components/common/buttons/SecondaryButton.vue";
+import router from "@/router";
+
 const route = useRoute();
 const productStore = useProductStore();
 
+// 🔹 params SEMPRE chegam como string
 const productId = Number(route.params.id);
 
 const product = computed<Product | undefined>(() =>
   productStore.getProductById(productId)
 );
+
+// 🔹 Garante IDs válidos para Firefox
+function safeId(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9-_]/g, "-");
+}
 
 function increase(item: OptionItem) {
   if (item.type === "quantity") {
@@ -22,8 +34,8 @@ function increase(item: OptionItem) {
 }
 
 function decrease(item: OptionItem) {
-  if (item.type === "quantity") {
-    if (item.quantity > 0) item.quantity--;
+  if (item.type === "quantity" && item.quantity > 0) {
+    item.quantity--;
   }
 }
 
@@ -35,21 +47,20 @@ function formatPrice(value: number): string {
 }
 
 function goBack() {
-  window.history.back();
+  router.push({ name: "home" });
 }
 </script>
 
 <template>
   <div id="cardapio">
     <div
-      <div
       v-for="(category, cIndex) in product?.options || []"
       :key="cIndex"
       id="listar"
     >
       <div class="dotted-line">
         <hr />
-        <span id="textDividers">« {{ category.categoryName }} »</span>
+        <span id="textDividers"> « {{ category.categoryName }} » </span>
         <hr />
       </div>
 
@@ -77,24 +88,28 @@ function goBack() {
         <!-- 🔹 ITEM COM CHECKBOX -->
         <div v-else-if="item.type === 'checkbox'">
           <input
-            name="item.name"
             type="checkbox"
             v-model="item.checked"
-            :id="`${category.categoryName}-${item.name}`"
+            :id="`${safeId(category.categoryName)}-${safeId(item.name)}`"
           />
         </div>
 
-        <!-- 🔹 NOME E PREÇO (COMUM AOS DOIS) -->
-        <label :for="`${category.categoryName}-${item.name}`" id="nomeItem">
+        <!-- 🔹 NOME E PREÇO -->
+        <label
+          :for="`${safeId(category.categoryName)}-${safeId(item.name)}`"
+          id="nomeItem"
+        >
           {{ item.name }}
         </label>
 
-        <label id="preco">R$: {{ formatPrice(item.price) }}</label>
+        <label id="preco"> R$: {{ formatPrice(item.price) }} </label>
 
         <br />
       </div>
     </div>
+
     <br />
+
     <PrimaryButton label="Adicionar" />
     <SecondaryButton @click="goBack()" label="Voltar" />
   </div>

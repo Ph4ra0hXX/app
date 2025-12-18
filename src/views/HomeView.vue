@@ -30,7 +30,7 @@ const products = productStore.getAllProducts();
 const router = useRouter();
 
 function goToProduct(id: number) {
-  router.push({ name: "product", params: { id } });
+  router.push({ name: "product", params: { id: String(id) } });
 }
 </script>
 
