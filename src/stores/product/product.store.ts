@@ -18,6 +18,7 @@ export const useProductStore = defineStore("product", {
                 price: 3.0,
                 type: "checkbox",
                 checked: false,
+                obrigatory: true,
               },
               {
                 name: "Pão Bola",
@@ -131,6 +132,22 @@ export const useProductStore = defineStore("product", {
   actions: {
     getAllProducts() {
       return this.products;
+    },
+    resetProductOptions(productId: number) {
+      const product: any = this.products.find((p) => p.id === productId);
+      if (!product) return;
+
+      product.options.forEach((option: any) => {
+        option.items.forEach((item: any) => {
+          if (item.type === "checkbox") {
+            item.checked = Boolean(item.obrigatory);
+          }
+
+          if (item.type === "quantity") {
+            item.quantity = 0;
+          }
+        });
+      });
     },
   },
 });

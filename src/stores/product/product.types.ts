@@ -7,6 +7,7 @@ export interface BaseItem {
   name: string;
   price: number;
   type: "checkbox" | "quantity";
+  obrigatory?: boolean;
 }
 
 /* =======================
@@ -37,6 +38,7 @@ export type OptionItem = CheckboxItem | QuantityItem;
 export interface ProductOption {
   categoryName: string;
   items: OptionItem[];
+  obrigatory?: boolean;
 }
 
 /* =======================

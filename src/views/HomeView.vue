@@ -14,7 +14,7 @@
           </div>
           <h3 class="card__price"></h3>
 
-          <button class="card__add">»</button>
+          <button class="card__add"><span id="goToItem">»</span></button>
         </div>
       </article>
     </div>
@@ -35,6 +35,10 @@ function goToProduct(id: number) {
 </script>
 
 <style scoped>
+#goToItem {
+  font-size: 25px;
+}
+
 #dividers {
   height: 18px;
   margin-bottom: 12px;
@@ -90,7 +94,7 @@ p {
   margin-bottom: 10px;
 }
 .card__info h2 {
-  font-size: 16px;
+  font-size: 20px;
   font-family: Barlow-Black;
   font-weight: 800;
   color: #141414;

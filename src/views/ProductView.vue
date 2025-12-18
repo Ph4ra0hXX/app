@@ -6,18 +6,16 @@ import type { OptionItem, Product } from "@/stores/product/product.types";
 import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
 import SecondaryButton from "@/components/common/buttons/SecondaryButton.vue";
 import router from "@/router";
+import { useOrderStore } from "@/stores/order/order.store";
 
 const route = useRoute();
 const productStore = useProductStore();
+const orderStore = useOrderStore();
 
 // 🔹 params SEMPRE chegam como string
 const productId = Number(route.params.id);
 
-const product = computed<Product | undefined>(() =>
-  productStore.getProductById(productId)
-);
-
-// 🔹 Garante IDs válidos para Firefox
+// 🔹 Garante IDs válidos (Firefox)
 function safeId(value: string) {
   return value
     .toLowerCase()
@@ -26,6 +24,36 @@ function safeId(value: string) {
     .replace(/[^a-z0-9-_]/g, "-");
 }
 
+function addToOrder() {
+  const product = productStore.getProductById(productId);
+  if (!product) return;
+
+  orderStore.addProduct(product);
+  productStore.resetProductOptions(productId);
+
+  router.push({ name: "home" });
+}
+
+// 🔹 Produto com inicialização de obrigatórios
+const product = computed<Product | undefined>(() => {
+  const prod = productStore.getProductById(productId);
+
+  prod?.options.forEach((category) => {
+    category.items.forEach((item) => {
+      if (item.type === "checkbox" && item.obrigatory) {
+        item.checked = true; // ✔ já vem marcado
+      }
+
+      if (item.type === "quantity" && item.quantity === undefined) {
+        item.quantity = 0;
+      }
+    });
+  });
+
+  return prod;
+});
+
+// 🔹 Quantidade
 function increase(item: OptionItem) {
   if (item.type === "quantity") {
     if (item.max && item.quantity >= item.max) return;
@@ -39,6 +67,7 @@ function decrease(item: OptionItem) {
   }
 }
 
+// 🔹 Formata preço
 function formatPrice(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
     minimumFractionDigits: 2,
@@ -46,6 +75,7 @@ function formatPrice(value: number): string {
   }).format(value);
 }
 
+// 🔹 Voltar
 function goBack() {
   router.push({ name: "home" });
 }
@@ -90,11 +120,12 @@ function goBack() {
           <input
             type="checkbox"
             v-model="item.checked"
+            :disabled="item.obrigatory"
             :id="`${safeId(category.categoryName)}-${safeId(item.name)}`"
           />
         </div>
 
-        <!-- 🔹 NOME E PREÇO -->
+        <!-- 🔹 NOME -->
         <label
           :for="`${safeId(category.categoryName)}-${safeId(item.name)}`"
           id="nomeItem"
@@ -102,6 +133,7 @@ function goBack() {
           {{ item.name }}
         </label>
 
+        <!-- 🔹 PREÇO -->
         <label id="preco"> R$: {{ formatPrice(item.price) }} </label>
 
         <br />
@@ -110,17 +142,12 @@ function goBack() {
 
     <br />
 
-    <PrimaryButton label="Adicionar" />
+    <PrimaryButton @click="addToOrder" label="Adicionar" />
     <SecondaryButton @click="goBack()" label="Voltar" />
   </div>
 </template>
 
 <style>
-* {
-  font-family: Arial, sans-serif;
-  font-weight: bold;
-}
-
 .item-row input[type="checkbox"] {
   width: 25px !important;
   height: 25px !important;
