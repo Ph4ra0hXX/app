@@ -41,12 +41,6 @@ function goToHome() {
       <span class="subtitle">Confira os itens antes de finalizar</span>
     </header>
 
-    <!-- EMPTY STATE -->
-    <div v-if="!orderItems.length" class="empty-state">
-      <p>Seu carrinho está vazio 😢</p>
-      <small>Adicione itens do cardápio</small>
-    </div>
-
     <!-- PRODUCTS -->
     <div
       v-for="(product, pIndex) in orderItems"
