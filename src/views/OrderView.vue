@@ -89,7 +89,7 @@ function editProduct(productIndex: number) {
 .order-page {
   max-width: 720px;
   margin: auto;
-  padding: 24px 20px 120px;
+  padding: 24px 0px 120px;
   color: #e0e0e0;
 }
 
