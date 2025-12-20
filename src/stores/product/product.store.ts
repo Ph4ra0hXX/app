@@ -18,7 +18,7 @@ export const useProductStore = defineStore("product", {
                 price: 3.0,
                 type: "checkbox",
                 checked: false,
-                obrigatory: true,
+                obrigatory: false,
               },
               {
                 name: "Pão Bola",

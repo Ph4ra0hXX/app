@@ -1,9 +1,12 @@
 import { defineStore } from "pinia";
 import type { Product } from "@/stores/product/product.types";
+import { useProductStore } from "@/stores/product/product.store";
 
 export const useOrderStore = defineStore("order", {
   state: () => ({
     items: [] as any[],
+    editingProductData: null as any,
+    editingProductIndex: null as number | null,
   }),
 
   getters: {},
@@ -42,13 +45,72 @@ export const useOrderStore = defineStore("order", {
         });
       });
 
-      this.items.push(orderProduct);
+      // Só adicionar se tiver itens
+      if (orderProduct.options.length > 0) {
+        // Se estava editando, substituir o item
+        if (this.editingProductIndex !== null && this.editingProductData) {
+          this.items[this.editingProductIndex] = orderProduct;
+          this.editingProductIndex = null;
+          this.editingProductData = null;
+        } else {
+          // Caso contrário, adicionar novo item
+          this.items.push(orderProduct);
+        }
+      }
 
       console.log(JSON.stringify(this.items, null, 2));
     },
 
     clearOrder() {
       this.items = [];
+    },
+
+    editProduct(productIndex: number) {
+      const productStore = useProductStore();
+      const orderProduct = this.items[productIndex];
+
+      if (!orderProduct) return;
+
+      // Armazenar os dados originais e o índice
+      this.editingProductData = JSON.parse(JSON.stringify(orderProduct));
+      this.editingProductIndex = productIndex;
+
+      const product = productStore.getProductById(orderProduct.productId);
+      if (!product) return;
+
+      // Reconstituir os itens selecionados no produto
+      product.options.forEach((option) => {
+        option.items.forEach((item) => {
+          // Procurar item nas opções do pedido
+          const orderItem = orderProduct.options.find(
+            (opt: any) =>
+              opt.itemName === item.name &&
+              opt.categoryName === option.categoryName
+          );
+
+          if (orderItem) {
+            if (item.type === "checkbox") {
+              item.checked = true;
+            } else if (item.type === "quantity") {
+              item.quantity = orderItem.quantity;
+            }
+          } else {
+            // Resetar itens não selecionados
+            if (item.type === "checkbox") {
+              item.checked = Boolean(item.obrigatory);
+            } else if (item.type === "quantity") {
+              item.quantity = 0;
+            }
+          }
+        });
+      });
+
+      return orderProduct.productId;
+    },
+
+    cancelEdit() {
+      this.editingProductData = null;
+      this.editingProductIndex = null;
     },
   },
 });

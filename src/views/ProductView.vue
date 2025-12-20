@@ -28,10 +28,18 @@ function addToOrder() {
   const product = productStore.getProductById(productId);
   if (!product) return;
 
+  // Verificar modo ANTES de adicionar
+  const isEditing = orderStore.editingProductIndex !== null;
+
   orderStore.addProduct(product);
   productStore.resetProductOptions(productId);
 
-  router.push({ name: "home" });
+  // Navegar baseado no modo anterior
+  if (isEditing) {
+    router.push({ name: "order" });
+  } else {
+    router.push({ name: "home" });
+  }
 }
 
 // 🔹 Produto com inicialização de obrigatórios
@@ -77,7 +85,20 @@ function formatPrice(value: number): string {
 
 // 🔹 Voltar
 function goBack() {
-  router.push({ name: "home" });
+  // Verificar modo ANTES de cancelar
+  const isEditing = orderStore.editingProductIndex !== null;
+
+  // Cancelar edição se houver
+  orderStore.cancelEdit();
+  // Resetar as opções do produto
+  productStore.resetProductOptions(productId);
+
+  // Navegar baseado no modo anterior
+  if (isEditing) {
+    router.push({ name: "order" });
+  } else {
+    router.push({ name: "home" });
+  }
 }
 </script>
 
@@ -142,7 +163,7 @@ function goBack() {
 
     <br />
 
-    <PrimaryButton @click="addToOrder" label="Adicionar" />
+    <PrimaryButton @click="addToOrder" label="Salvar" />
     <SecondaryButton @click="goBack()" label="Voltar" />
   </div>
 </template>
@@ -248,7 +269,7 @@ function goBack() {
 
 #preco {
   font-size: 14px;
-  color: #ffffff;
+  color: #4caf50;
 }
 
 /* ===== BOTÕES FINAIS ===== */
