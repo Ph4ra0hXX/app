@@ -37,7 +37,7 @@ function goToHome() {
       <button class="back-home-btn" @click="goToHome">
         <i class="fa-solid fa-arrow-left"></i> Voltar
       </button>
-      <h1>🛒 Meu Pedido</h1>
+      <h1><i class="fa-solid fa-basket-shopping"></i> Meu Pedido</h1>
       <span class="subtitle">Confira os itens antes de finalizar</span>
     </header>
 
