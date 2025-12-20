@@ -17,14 +17,17 @@ const total = computed(() => {
   return orderStore.items.reduce((sum, item) => {
     return (
       sum +
-      item.options.reduce((optSum, opt) => optSum + (opt.totalPrice || 0), 0)
+      item.options.reduce(
+        (optSum: any, opt: any) => optSum + (opt.totalPrice || 0),
+        0
+      )
     );
   }, 0);
 });
 
 const itemCount = computed(() => orderStore.items.length);
 
-function currency(value) {
+function currency(value: any) {
   return Number(value).toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
