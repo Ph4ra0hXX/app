@@ -25,11 +25,18 @@ function editProduct(productIndex: number) {
     router.push({ name: "product", params: { id: productId } });
   }
 }
+
+function goToHome() {
+  router.push({ name: "home" });
+}
 </script>
 
 <template>
   <div class="order-page">
     <header class="header">
+      <button class="back-home-btn" @click="goToHome">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+      </button>
       <h1>🛒 Meu Pedido</h1>
       <span class="subtitle">Confira os itens antes de finalizar</span>
     </header>
@@ -91,6 +98,18 @@ function editProduct(productIndex: number) {
   margin: auto;
   padding: 24px 0px 120px;
   color: #e0e0e0;
+}
+
+.back-home-btn {
+  align-items: center;
+  background: #ffd600;
+  color: #000000;
+  border: none;
+  font-size: 15px;
+  border-radius: 25px;
+  padding: 10px 22px;
+  margin-bottom: 18px;
+  text-align: center;
 }
 
 /* HEADER */
@@ -206,10 +225,6 @@ function editProduct(productIndex: number) {
 
 /* FOOTER */
 .footer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
   padding: 16px 20px 20px;
   border-top: 1px solid #2a2a2a;
   backdrop-filter: blur(6px);

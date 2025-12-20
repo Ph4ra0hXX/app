@@ -1,5 +1,5 @@
 <template>
-  <div class="floating-cart-btn">
+  <div class="floating-cart-btn" @click="goToOrder">
     <div class="cart-circle">
       <i class="fa-solid fa-basket-shopping"></i>
       <span class="cart-badge">{{ itemCount }}</span>
@@ -10,8 +10,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useOrderStore } from "@/stores/order/order.store";
+import { useRouter } from "vue-router";
 
 const orderStore = useOrderStore();
+const router = useRouter();
+function goToOrder() {
+  router.push({ name: "order" });
+}
 
 const total = computed(() => {
   return orderStore.items.reduce((sum, item) => {
