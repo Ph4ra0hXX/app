@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import FloatingCartButton from "@/components/layout/FloatingCartButton.vue";
+import Toast from "@/components/common/Toast.vue";
+import { useToast } from "@/composables/useToast";
+
+const { toastRef } = useToast();
 </script>
 
 <template>
   <router-view />
   <FloatingCartButton />
+  <Toast ref="toastRef" />
 </template>
 
 <style scoped>

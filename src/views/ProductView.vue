@@ -7,10 +7,12 @@ import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
 import SecondaryButton from "@/components/common/buttons/SecondaryButton.vue";
 import router from "@/router";
 import { useOrderStore } from "@/stores/order/order.store";
+import { useToast } from "@/composables/useToast";
 
 const route = useRoute();
 const productStore = useProductStore();
 const orderStore = useOrderStore();
+const { showToast } = useToast();
 
 // 🔹 params SEMPRE chegam como string
 const productId = Number(route.params.id);
@@ -34,10 +36,12 @@ function addToOrder() {
   orderStore.addProduct(product);
   productStore.resetProductOptions(productId);
 
-  // Navegar baseado no modo anterior
+  // Toast de sucesso
   if (isEditing) {
+    showToast("Edição salva com sucesso!", "success");
     router.push({ name: "order" });
   } else {
+    showToast("Item adicionado ao carrinho!", "success");
     router.push({ name: "home" });
   }
 }
