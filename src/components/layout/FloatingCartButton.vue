@@ -1,5 +1,9 @@
 <template>
-  <div class="floating-cart-btn" @click="goToOrder">
+  <div
+    v-if="route.name !== 'order'"
+    class="floating-cart-btn"
+    @click="goToOrder"
+  >
     <div class="cart-circle">
       <i class="fa-solid fa-basket-shopping"></i>
       <span class="cart-badge">{{ itemCount }}</span>
@@ -10,10 +14,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useOrderStore } from "@/stores/order/order.store";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 const orderStore = useOrderStore();
 const router = useRouter();
+const route = useRoute();
 function goToOrder() {
   router.push({ name: "order" });
 }
