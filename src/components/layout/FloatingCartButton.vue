@@ -47,7 +47,7 @@ function currency(value: any) {
 
 <style scoped>
 .fa-solid {
-  font-size: 23px;
+  font-size: 22px;
   color: #ffffff;
 }
 
