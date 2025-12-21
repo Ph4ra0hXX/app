@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useOrderStore } from "@/stores/order/order.store";
 import { useRouter } from "vue-router";
 import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
@@ -29,9 +29,42 @@ function editProduct(productIndex: number) {
 function goToHome() {
   router.push({ name: "home" });
 }
+
+const showRemoveModal = ref(false);
+const productIndexToRemove = ref<number | null>(null);
+
+function openRemoveModal(index: number) {
+  productIndexToRemove.value = index;
+  showRemoveModal.value = true;
+}
+
+function cancelRemove() {
+  showRemoveModal.value = false;
+  productIndexToRemove.value = null;
+}
+
+function confirmRemove() {
+  if (productIndexToRemove.value !== null) {
+    orderStore.removeProduct(productIndexToRemove.value);
+  }
+  cancelRemove();
+}
 </script>
 
 <template>
+  <!-- REMOVE MODAL -->
+  <div v-if="showRemoveModal" class="modal-overlay">
+    <div class="modal">
+      <h3>Remover item</h3>
+      <p>Deseja remover este item do pedido?</p>
+
+      <div class="modal-actions">
+        <SecondaryButton label="Cancelar" @click="cancelRemove" />
+        <PrimaryButton label="Remover" @click="confirmRemove" />
+      </div>
+    </div>
+  </div>
+
   <div class="order-page">
     <header class="header">
       <button class="back-home-btn" @click="goToHome">
@@ -68,6 +101,7 @@ function goToHome() {
 
       <div class="product-actions">
         <SecondaryButton label="Editar" @click="editProduct(pIndex)" />
+        <SecondaryButton label="Remover" @click="openRemoveModal(pIndex)" />
       </div>
     </div>
 
@@ -87,6 +121,44 @@ function goToHome() {
 </template>
 
 <style scoped>
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal {
+  background: #1e1e1e;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+  border: 1px solid #2a2a2a;
+}
+
+.modal h3 {
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.modal p {
+  color: #bdbdbd;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
 .order-page {
   max-width: 720px;
   margin: auto;
@@ -237,7 +309,7 @@ function goToHome() {
 }
 
 .total span {
-  color: #bdbdbd;
+  color: #ffffff;
 }
 
 .total strong {

@@ -112,5 +112,15 @@ export const useOrderStore = defineStore("order", {
       this.editingProductData = null;
       this.editingProductIndex = null;
     },
+
+    removeProduct(productIndex: number) {
+      // Se estiver removendo o produto que está sendo editado
+      if (this.editingProductIndex === productIndex) {
+        this.editingProductIndex = null;
+        this.editingProductData = null;
+      }
+
+      this.items.splice(productIndex, 1);
+    },
   },
 });
