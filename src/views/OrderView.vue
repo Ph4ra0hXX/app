@@ -174,7 +174,6 @@ function confirmRemove() {
   font-size: 15px;
   border-radius: 25px;
   padding: 10px 22px;
-  margin-bottom: 18px;
   text-align: center;
 }
 

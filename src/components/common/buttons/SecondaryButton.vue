@@ -25,8 +25,8 @@ defineProps<{
   text-transform: uppercase;
   transition: all 0.15s ease;
 
-  background: #ffffff;
-  color: #000;
-  border: 2px solid #e0e0e0;
+  background: none;
+  color: #ffffff;
+  border: 1px solid #fdd426;
 }
 </style>
