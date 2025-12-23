@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useOrderStore } from "@/stores/order/order.store";
 import { useCustomerStore } from "@/stores/customer/customer.store";
 
-const orderStore = useOrderStore();
 const customerStore = useCustomerStore();
 
 const customer = computed(() => customerStore.customer);
