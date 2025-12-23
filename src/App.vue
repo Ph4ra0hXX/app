@@ -2,12 +2,14 @@
 import FloatingCartButton from "@/components/layout/FloatingCartButton.vue";
 import Toast from "./components/common/Toast.vue";
 import { useToast } from "@/composables/useToast";
+import Logo from "@/components/Logo.vue";
 
 // @ts-ignore
 const { toastRef } = useToast();
 </script>
 
 <template>
+  <Logo url="https://golds-burger-app.vercel.app/logo.webp" alt="Logo" />
   <router-view />
   <FloatingCartButton />
   <Toast ref="toastRef" />

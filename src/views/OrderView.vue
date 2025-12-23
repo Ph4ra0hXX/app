@@ -49,6 +49,10 @@ function confirmRemove() {
   }
   cancelRemove();
 }
+
+function goToCheckout() {
+  router.push({ name: "checkout" });
+}
 </script>
 
 <template>
@@ -114,7 +118,7 @@ function confirmRemove() {
 
       <div class="actions">
         <SecondaryButton label="Limpar" @click="orderStore.clearOrder" />
-        <PrimaryButton label="Finalizar Pedido" />
+        <PrimaryButton @click="goToCheckout()" label="Finalizar Pedido" />
       </div>
     </footer>
   </div>
@@ -162,7 +166,7 @@ function confirmRemove() {
 .order-page {
   max-width: 720px;
   margin: auto;
-  padding: 24px 0px 120px;
+  padding: 0px 0px 120px;
   color: #e0e0e0;
 }
 

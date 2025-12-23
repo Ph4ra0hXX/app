@@ -3,6 +3,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
 import ProductView from "@/views/ProductView.vue";
 import OrderView from "@/views/OrderView.vue";
+import Checkout from "@/views/Checkout.vue";
 
 const routes = [
   {
@@ -14,6 +15,11 @@ const routes = [
     path: "/order",
     name: "order",
     component: OrderView,
+  },
+  {
+    path: "/checkout",
+    name: "checkout",
+    component: Checkout,
   },
   {
     path: "/product/:id",

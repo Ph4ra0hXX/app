@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="route.name !== 'order'"
+    v-if="route.name !== 'order' && route.name !== 'checkout' && itemCount > 0"
     class="floating-cart-btn"
     @click="goToOrder"
   >
