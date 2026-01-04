@@ -13,7 +13,7 @@
 </template>
 <script setup lang="ts">
 import { computed } from "vue";
-import { useOrderStore } from "@/stores/order/order.store";
+import { useOrderStore } from "@/stores";
 import { useRouter, useRoute } from "vue-router";
 
 const orderStore = useOrderStore();

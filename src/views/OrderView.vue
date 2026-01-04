@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useOrderStore } from "@/stores/order/order.store";
+import { useOrderStore } from "@/stores";
 import { useRouter } from "vue-router";
 import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
 import SecondaryButton from "@/components/common/buttons/SecondaryButton.vue";
@@ -9,50 +9,48 @@ const orderStore = useOrderStore();
 const router = useRouter();
 
 const orderItems = computed(() => orderStore.items);
-
 const orderTotal = computed(() =>
-  orderItems.value.reduce((total, product) => {
-    return (
+  orderItems.value.reduce(
+    (total, product) =>
       total +
-      product.options.reduce((sum: number, opt: any) => sum + opt.totalPrice, 0)
-    );
-  }, 0)
+      product.options.reduce(
+        (sum: number, opt: any) => sum + opt.totalPrice,
+        0
+      ),
+    0
+  )
 );
-
-function editProduct(productIndex: number) {
-  const productId = orderStore.editProduct(productIndex);
-  if (productId) {
-    router.push({ name: "product", params: { id: productId } });
-  }
-}
-
-function goToHome() {
-  router.push({ name: "home" });
-}
 
 const showRemoveModal = ref(false);
 const productIndexToRemove = ref<number | null>(null);
 
-function openRemoveModal(index: number) {
+const editProduct = (index: number) => {
+  const id = orderStore.editProduct(index);
+  if (id) router.push({ name: "product", params: { id } });
+};
+
+const openRemoveModal = (index: number) => {
   productIndexToRemove.value = index;
   showRemoveModal.value = true;
-}
+};
 
-function cancelRemove() {
+const cancelRemove = () => {
   showRemoveModal.value = false;
   productIndexToRemove.value = null;
-}
+};
 
-function confirmRemove() {
-  if (productIndexToRemove.value !== null) {
+const confirmRemove = () => {
+  if (productIndexToRemove.value !== null)
     orderStore.removeProduct(productIndexToRemove.value);
-  }
   cancelRemove();
-}
+};
 
-function goToCheckout() {
-  router.push({ name: "checkout" });
-}
+const getProductTotal = (product: any) => {
+  return product.options.reduce(
+    (sum: number, opt: any) => sum + opt.totalPrice,
+    0
+  );
+};
 </script>
 
 <template>
@@ -71,10 +69,6 @@ function goToCheckout() {
 
   <div class="order-page">
     <header class="header">
-      <button class="back-home-btn" @click="goToHome">
-        <i class="fa-solid fa-arrow-left"></i> Voltar
-      </button>
-      <h1><i class="fa-solid fa-basket-shopping"></i> Meu Pedido</h1>
       <span class="subtitle">Confira os itens antes de finalizar</span>
     </header>
 
@@ -102,9 +96,12 @@ function goToCheckout() {
           <span class="price"> R$ {{ option.totalPrice.toFixed(2) }} </span>
         </div>
       </div>
-
+      <div class="product-total">
+        <span>Subtotal</span>
+        <strong>R$ {{ getProductTotal(product).toFixed(2) }}</strong>
+      </div>
       <div class="product-actions">
-        <SecondaryButton label="Editar" @click="editProduct(pIndex)" />
+        <PrimaryButton label="Editar" @click="editProduct(pIndex)" />
         <SecondaryButton label="Remover" @click="openRemoveModal(pIndex)" />
       </div>
     </div>
@@ -117,15 +114,20 @@ function goToCheckout() {
       </div>
 
       <div class="actions">
-        <SecondaryButton label="Limpar" @click="orderStore.clearOrder" />
-        <PrimaryButton @click="goToCheckout()" label="Finalizar Pedido" />
+        <PrimaryButton
+          @click="() => router.push({ name: 'checkout' })"
+          label="Finalizar Pedido"
+        />
       </div>
     </footer>
+    <SecondaryButton
+      label="Voltar"
+      @click="() => router.push({ name: 'home' })"
+    />
   </div>
 </template>
 
 <style scoped>
-/* MODAL */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -150,13 +152,11 @@ function goToCheckout() {
   color: #ffffff;
   margin-bottom: 10px;
 }
-
 .modal p {
   color: #bdbdbd;
   font-size: 14px;
   margin-bottom: 20px;
 }
-
 .modal-actions {
   display: flex;
   gap: 12px;
@@ -166,22 +166,20 @@ function goToCheckout() {
 .order-page {
   max-width: 720px;
   margin: auto;
-  padding: 0px 0px 120px;
+  padding: 0 0 120px;
   color: #e0e0e0;
 }
 
 .back-home-btn {
-  align-items: center;
   background: #ffd600;
   color: #000000;
   border: none;
   font-size: 15px;
   border-radius: 25px;
   padding: 10px 22px;
-  text-align: center;
+  cursor: pointer;
 }
 
-/* HEADER */
 .header {
   text-align: center;
   margin-bottom: 32px;
@@ -192,29 +190,11 @@ function goToCheckout() {
   font-size: 26px;
   letter-spacing: 0.5px;
 }
-
 .subtitle {
   color: #9e9e9e;
   font-size: 14px;
 }
 
-/* EMPTY */
-.empty-state {
-  text-align: center;
-  margin-top: 80px;
-  color: #8a8a8a;
-}
-
-.empty-state p {
-  font-size: 16px;
-}
-
-.empty-state small {
-  font-size: 13px;
-  color: #6f6f6f;
-}
-
-/* PRODUCT CARD */
 .product-card {
   border-radius: 14px;
   padding: 18px;
@@ -240,14 +220,41 @@ function goToCheckout() {
   font-size: 18px;
   font-weight: 600;
 }
-
-/* PRODUCT ACTIONS */
 .product-actions {
   display: flex;
   gap: 10px;
 }
 
-/* OPTION ROW */
+.product-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-top: 1px dashed #2c2c2c;
+  border-radius: 10px;
+  background: linear-gradient(
+    135deg,
+    rgba(76, 175, 80, 0.08) 0%,
+    rgba(76, 175, 80, 0.04) 100%
+  );
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.product-total span {
+  font-weight: 500;
+  color: #b0b0b0;
+  letter-spacing: 0.5px;
+}
+
+.product-total strong {
+  color: #4caf50;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.3px;
+}
+
 .option-row {
   display: flex;
   justify-content: space-between;
@@ -259,24 +266,20 @@ function goToCheckout() {
 .option-row:last-child {
   border-bottom: none;
 }
-
 .option-info {
   display: flex;
   flex-direction: column;
 }
-
 .item-name {
   font-size: 14px;
   color: #e0e0e0;
 }
 
-/* VALUES */
 .option-values {
   display: flex;
   align-items: center;
   gap: 14px;
 }
-
 .quantity {
   font-size: 12px;
   color: #bdbdbd;
@@ -284,7 +287,6 @@ function goToCheckout() {
   padding: 2px 10px;
   border-radius: 999px;
 }
-
 .price {
   font-weight: 600;
   color: #4caf50;
@@ -292,14 +294,10 @@ function goToCheckout() {
   text-align: right;
 }
 
-/* FOOTER */
 .footer {
-  padding: 16px 20px 20px;
+  padding: 16px 0px 10px;
   border-top: 1px solid #2a2a2a;
   backdrop-filter: blur(6px);
-}
-
-.footer > div {
   max-width: 720px;
   margin: auto;
 }
@@ -310,16 +308,10 @@ function goToCheckout() {
   font-size: 18px;
   margin-bottom: 14px;
 }
-
-.total span {
-  color: #ffffff;
-}
-
+.total span,
 .total strong {
   color: #ffffff;
 }
-
-/* ACTIONS */
 .actions {
   display: flex;
   gap: 14px;

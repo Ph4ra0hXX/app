@@ -1,36 +1,30 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useCustomerStore } from "@/stores/customer/customer.store";
+import { useCustomerStore } from "@/stores";
+import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
+import SecondaryButton from "@/components/common/buttons/SecondaryButton.vue";
+import TextInput from "@/components/common/inputs/TextInput.vue";
+import { useRouter } from "vue-router";
 
 const customerStore = useCustomerStore();
-
 const customer = computed(() => customerStore.customer);
-function finalizarPedido() {
-  if (!customer.value.nome) {
-    alert("Informe seu nome");
-    return;
-  }
+const router = useRouter();
 
+const finalizarPedido = () => {
+  if (!customer.value.nome) return alert("Informe seu nome");
   if (
     customer.value.formaDeEntrega === "Quero entrega" &&
     (!customer.value.rua || !customer.value.numero)
-  ) {
-    alert("Informe o endereço completo");
-    return;
-  }
-
-  if (!customer.value.formaDePagamento) {
-    alert("Escolha a forma de pagamento");
-    return;
-  }
-
+  )
+    return alert("Informe o endereço completo");
+  if (!customer.value.formaDePagamento)
+    return alert("Escolha a forma de pagamento");
   customerStore.finalizeCustomer();
-}
+};
 
-function copyToClipboard() {
+const copyToClipboard = () => {
   navigator.clipboard.writeText("SUA_CHAVE_PIX_AQUI");
-  alert("PIX copiado!");
-}
+};
 </script>
 
 <template>
@@ -77,38 +71,21 @@ function copyToClipboard() {
       <!-- DADOS -->
       <div class="detail-info">
         <!-- NOME -->
-        <div class="info">
-          <h3>Seu Nome:</h3>
-        </div>
-        <div class="input-field">
-          <input v-model="customer.nome" type="text" />
-        </div>
+        <TextInput v-model="customer.nome" label="Seu Nome:" />
         <br />
 
         <!-- ENDEREÇO -->
         <div v-if="customer.formaDeEntrega === 'Quero entrega'">
-          <div class="info"><h3>Rua:</h3></div>
-          <div class="input-field">
-            <input v-model="customer.rua" type="text" />
-          </div>
+          <TextInput v-model="customer.rua" label="Rua:" />
           <br />
 
-          <div class="info"><h3>Bairro:</h3></div>
-          <div class="input-field">
-            <input v-model="customer.bairro" type="text" />
-          </div>
+          <TextInput v-model="customer.bairro" label="Bairro:" />
           <br />
 
-          <div class="info"><h3>Número:</h3></div>
-          <div class="input-field">
-            <input v-model="customer.numero" type="number" />
-          </div>
+          <TextInput v-model="customer.numero" type="number" label="Número:" />
           <br />
 
-          <div class="info"><h3>Referência:</h3></div>
-          <div class="input-field">
-            <input v-model="customer.referencia" type="text" />
-          </div>
+          <TextInput v-model="customer.referencia" label="Referência:" />
           <br />
         </div>
 
@@ -153,20 +130,18 @@ function copyToClipboard() {
         </div>
 
         <!-- PIX -->
-        <div v-if="customer.formaDePagamento === 'Pix'" class="input-field">
-          <button id="butCopiarPix" @click="copyToClipboard">Copiar PIX</button>
+        <div v-if="customer.formaDePagamento === 'Pix'">
+          <SecondaryButton label="Copiar PIX" @click="copyToClipboard" />
         </div>
 
         <!-- TROCO -->
         <div v-if="customer.formaDePagamento === 'Dinheiro'">
-          <div class="info"><h3>Troco?</h3></div>
-          <div class="input-field">
-            <input
-              v-model="customer.troco"
-              type="number"
-              placeholder="Troco para quanto?"
-            />
-          </div>
+          <TextInput
+            v-model="customer.troco"
+            type="number"
+            label="Troco?"
+            placeholder="Troco para quanto?"
+          />
         </div>
 
         <p id="textDescritivo">
@@ -174,40 +149,32 @@ function copyToClipboard() {
           de R$ 4,00 será somado ao total.
         </p>
 
-        <button @click="finalizarPedido" class="btn">Finalizar Pedido</button>
+        <PrimaryButton @click="finalizarPedido" label="Finalizar Pedido" />
+        <SecondaryButton
+          label="Voltar"
+          @click="() => router.push({ name: 'order' })"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* ===============================
-   RESET / BASE
-================================ */
-*,
-*::before,
-*::after {
+* {
   box-sizing: border-box;
 }
-
 html,
 body {
   margin: 0;
   padding: 0;
 }
 
-/* ===============================
-   CONTAINER PRINCIPAL
-================================ */
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* ===============================
-   CARD CHECKOUT
-================================ */
 .checkout-card {
   width: 100%;
   max-width: 520px;
@@ -217,9 +184,6 @@ body {
   border: 1px solid #2a2a2a;
 }
 
-/* ===============================
-   TÍTULO
-================================ */
 .title p {
   font-size: 24px;
   font-weight: 700;
@@ -227,16 +191,12 @@ body {
   color: #ffffff;
   margin-bottom: 24px;
 }
-
 .title span {
   font-size: 13px;
   font-weight: 500;
   color: #9ca3af;
 }
 
-/* ===============================
-   GRID DE OPÇÕES (RADIOS)
-================================ */
 .payment-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
@@ -244,9 +204,6 @@ body {
   margin-bottom: 24px;
 }
 
-/* ===============================
-   CARD RADIO
-================================ */
 .price-card {
   position: relative;
   background: #242424;
@@ -261,16 +218,12 @@ body {
 .price-card:hover {
   background: #2a2a2a;
 }
-
 .price-card input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
-/* ===============================
-   CONTEÚDO DO CARD
-================================ */
 .price-card .content {
   display: flex;
   flex-direction: column;
@@ -286,13 +239,9 @@ body {
   margin-top: 4px;
 }
 
-/* ===============================
-   RADIO SELECIONADO
-================================ */
 .price-card input:checked ~ label {
   border-color: #ffd600;
 }
-
 .price-card input:checked ~ .content {
   color: #ffd600;
 }
@@ -304,80 +253,17 @@ body {
   border: 2px solid transparent;
 }
 
-/* ===============================
-   DADOS / INFORMAÇÕES
-================================ */
 .detail-info {
   width: 100%;
 }
 
-/* ===============================
-   TÍTULOS DOS CAMPOS
-================================ */
-.info h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: #d1d5db;
-  margin: 0 0 6px;
+.price-card label {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 2px solid transparent;
 }
 
-/* ===============================
-   INPUT FIELD (ANTI-QUEBRA)
-================================ */
-.input-field {
-  width: 100%;
-  max-width: 100%;
-  display: flex;
-}
-
-/* ===============================
-   INPUTS
-================================ */
-.input-field input {
-  width: 100%;
-  min-width: 0;
-  padding: 12px 14px;
-  background: #0f0f0f;
-  border-radius: 10px;
-  border: 1px solid #2a2a2a;
-  color: #ffffff;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s ease;
-}
-
-.input-field input::placeholder {
-  color: #6b7280;
-}
-
-.input-field input:focus {
-  border-color: #ffd600;
-}
-
-/* ===============================
-   BOTÃO PIX
-================================ */
-#butCopiarPix {
-  width: 100%;
-  padding: 12px;
-  margin-top: 12px;
-  background: #2563eb;
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-#butCopiarPix:hover {
-  background: #1d4ed8;
-}
-
-/* ===============================
-   TEXTO DESCRITIVO
-================================ */
 #textDescritivo {
   font-size: 12px;
   color: #9ca3af;
@@ -386,30 +272,10 @@ body {
   line-height: 1.4;
 }
 
-/* ===============================
-   BOTÃO FINALIZAR
-================================ */
-.btn {
-  width: 100%;
-  padding: 14px;
-  background: #ffd600;
-  border: none;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #ffffff;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-/* ===============================
-   RESPONSIVO (MOBILE)
-================================ */
 @media (max-width: 480px) {
   .checkout-card {
     padding: 20px;
   }
-
   .title p {
     font-size: 22px;
   }
