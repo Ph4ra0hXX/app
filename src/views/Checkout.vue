@@ -255,6 +255,10 @@ body {
   width: 100%;
 }
 
+.info h3 {
+  color: #fff;
+}
+
 .price-card label {
   position: absolute;
   inset: 0;
