@@ -1,6 +1,11 @@
 <template>
+  <div v-if="productStore.enabledProducts.length === 0" class="empty-menu">
+    <h1>Cardápio indisponível</h1>
+    <p>Nenhum item habilitado no momento.</p>
+  </div>
+
   <div
-    v-for="product in productStore.products"
+    v-for="product in productStore.enabledProducts"
     :key="product.id"
     class="container"
   >
@@ -135,5 +140,24 @@ img.vert-move {
   100% {
     transform: translateY(-10px);
   }
+}
+
+.empty-menu {
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  color: #ffffff;
+  text-align: center;
+}
+
+.empty-menu h1 {
+  margin: 0 0 10px;
+  font-size: 24px;
+}
+
+.empty-menu p {
+  margin: 0;
+  color: #bdbdbd;
+  font-size: 14px;
 }
 </style>
