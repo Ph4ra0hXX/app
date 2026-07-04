@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useProductStore, useOrderStore, type OptionItem } from "@/stores";
+import {
+  hasSelectedOptions,
+  useProductStore,
+  useOrderStore,
+  type OptionItem,
+} from "@/stores";
 import AppButton from "@/components/AppButton.vue";
 import { useToast } from "@/useToast";
 import { formatCurrency } from "@/formatCurrency";
@@ -28,8 +33,15 @@ const addToOrder = () => {
   const product = productStore.getProductById(productId);
   if (!product) return;
 
+  if (!hasSelectedOptions(product)) {
+    showToast("Selecione pelo menos um item para continuar.", "error");
+    return;
+  }
+
   const isEditing = orderStore.editingProductIndex !== null;
-  orderStore.addProduct(product);
+  const saved = orderStore.addProduct(product);
+  if (!saved) return;
+
   productStore.resetProductOptions(productId);
 
   const message = isEditing

@@ -79,6 +79,9 @@ const getSelectedOptions = (product: Product): OrderOption[] =>
     })
   );
 
+export const hasSelectedOptions = (product: Product) =>
+  getSelectedOptions(product).length > 0;
+
 const getProductTotal = (product: OrderProduct) =>
   product.options.reduce((sum, option) => sum + option.totalPrice, 0);
 
@@ -249,20 +252,24 @@ export const useOrderStore = defineStore("order", {
 
   actions: {
     addProduct(product: Product) {
+      const options = getSelectedOptions(product);
+
+      if (options.length === 0) return false;
+
       const orderProduct: OrderProduct = {
         productId: product.id,
         productName: product.name,
-        options: getSelectedOptions(product),
+        options,
       };
 
-      if (orderProduct.options.length > 0) {
-        if (this.editingProductIndex !== null) {
-          this.items[this.editingProductIndex] = orderProduct;
-          this.editingProductIndex = null;
-        } else {
-          this.items.push(orderProduct);
-        }
+      if (this.editingProductIndex !== null) {
+        this.items[this.editingProductIndex] = orderProduct;
+        this.editingProductIndex = null;
+      } else {
+        this.items.push(orderProduct);
       }
+
+      return true;
     },
 
     clearOrder() {

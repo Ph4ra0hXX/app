@@ -3,15 +3,17 @@ withDefaults(
   defineProps<{
     label: string;
     variant?: "primary" | "secondary";
+    disabled?: boolean;
   }>(),
   {
     variant: "primary",
+    disabled: false,
   }
 );
 </script>
 
 <template>
-  <button class="app-button" :class="variant">
+  <button class="app-button" :class="variant" :disabled="disabled">
     {{ label }}
   </button>
 </template>
@@ -42,5 +44,10 @@ withDefaults(
   background: none;
   color: #ffffff;
   border: 1px solid #fdd426;
+}
+
+.app-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 </style>
