@@ -34,15 +34,53 @@ export interface Product {
   options: ProductOption[];
 }
 
-export interface OrderItem {
-  productId: number;
-  productName: string;
+export interface OrderOption {
   categoryName: string;
   itemName: string;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
 }
+
+export interface OrderProduct {
+  productId: number;
+  productName: string;
+  options: OrderOption[];
+}
+
+const getSelectedOptions = (product: Product): OrderOption[] =>
+  product.options.flatMap((option) =>
+    option.items.flatMap((item) => {
+      if (item.type === "checkbox" && (item.checked || item.obrigatory)) {
+        return [
+          {
+            categoryName: option.categoryName,
+            itemName: item.name,
+            quantity: 1,
+            unitPrice: item.price,
+            totalPrice: item.price,
+          },
+        ];
+      }
+
+      if (item.type === "quantity" && item.quantity > 0) {
+        return [
+          {
+            categoryName: option.categoryName,
+            itemName: item.name,
+            quantity: item.quantity,
+            unitPrice: item.price,
+            totalPrice: item.quantity * item.price,
+          },
+        ];
+      }
+
+      return [];
+    })
+  );
+
+const getProductTotal = (product: OrderProduct) =>
+  product.options.reduce((sum, option) => sum + option.totalPrice, 0);
 
 export const useCustomerStore = defineStore("customer", {
   state: () => ({
@@ -173,7 +211,7 @@ export const useProductStore = defineStore("product", {
           },
         ],
       },
-    ],
+    ] as Product[],
   }),
 
   getters: {
@@ -182,10 +220,6 @@ export const useProductStore = defineStore("product", {
   },
 
   actions: {
-    getAllProducts() {
-      return this.products;
-    },
-
     resetProductOptions(productId: number) {
       const product = this.products.find((p) => p.id === productId);
       if (!product) return;
@@ -202,39 +236,24 @@ export const useProductStore = defineStore("product", {
 
 export const useOrderStore = defineStore("order", {
   state: () => ({
-    items: [] as any[],
+    items: [] as OrderProduct[],
     editingProductIndex: null as number | null,
   }),
 
+  getters: {
+    itemCount: (state) => state.items.length,
+    total: (state) =>
+      state.items.reduce((sum, product) => sum + getProductTotal(product), 0),
+    productTotal: () => getProductTotal,
+  },
+
   actions: {
     addProduct(product: Product) {
-      const orderProduct = {
+      const orderProduct: OrderProduct = {
         productId: product.id,
         productName: product.name,
-        options: [] as any[],
+        options: getSelectedOptions(product),
       };
-
-      product.options.forEach((option) => {
-        option.items.forEach((item) => {
-          if (item.type === "checkbox" && (item.checked || item.obrigatory)) {
-            orderProduct.options.push({
-              categoryName: option.categoryName,
-              itemName: item.name,
-              quantity: 1,
-              unitPrice: item.price,
-              totalPrice: item.price,
-            });
-          } else if (item.type === "quantity" && item.quantity > 0) {
-            orderProduct.options.push({
-              categoryName: option.categoryName,
-              itemName: item.name,
-              quantity: item.quantity,
-              unitPrice: item.price,
-              totalPrice: item.quantity * item.price,
-            });
-          }
-        });
-      });
 
       if (orderProduct.options.length > 0) {
         if (this.editingProductIndex !== null) {
@@ -243,7 +262,6 @@ export const useOrderStore = defineStore("order", {
         } else {
           this.items.push(orderProduct);
         }
-        console.log(JSON.stringify(this.items, null, 2));
       }
     },
 
@@ -262,7 +280,7 @@ export const useOrderStore = defineStore("order", {
       product.options.forEach((option) => {
         option.items.forEach((item) => {
           const orderItem = orderProduct.options.find(
-            (opt: any) =>
+            (opt) =>
               opt.itemName === item.name &&
               opt.categoryName === option.categoryName
           );

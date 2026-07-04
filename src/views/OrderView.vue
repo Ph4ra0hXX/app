@@ -1,25 +1,12 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import { useOrderStore } from "@/stores";
 import { useRouter } from "vue-router";
-import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
-import SecondaryButton from "@/components/common/buttons/SecondaryButton.vue";
+import AppButton from "@/components/AppButton.vue";
+import { formatCurrency } from "@/formatCurrency";
 
 const orderStore = useOrderStore();
 const router = useRouter();
-
-const orderItems = computed(() => orderStore.items);
-const orderTotal = computed(() =>
-  orderItems.value.reduce(
-    (total, product) =>
-      total +
-      product.options.reduce(
-        (sum: number, opt: any) => sum + opt.totalPrice,
-        0
-      ),
-    0
-  )
-);
 
 const showRemoveModal = ref(false);
 const productIndexToRemove = ref<number | null>(null);
@@ -45,24 +32,19 @@ const confirmRemove = () => {
   cancelRemove();
 };
 
-const getProductTotal = (product: any) => {
-  return product.options.reduce(
-    (sum: number, opt: any) => sum + opt.totalPrice,
-    0
-  );
-};
+const goToCheckout = () => router.push({ name: "checkout" });
+const goHome = () => router.push({ name: "home" });
 </script>
 
 <template>
-  <!-- REMOVE MODAL -->
   <div v-if="showRemoveModal" class="modal-overlay">
     <div class="modal">
       <h3>Remover item</h3>
       <p>Deseja remover este item do pedido?</p>
 
       <div class="modal-actions">
-        <SecondaryButton label="Cancelar" @click="cancelRemove" />
-        <PrimaryButton label="Remover" @click="confirmRemove" />
+        <AppButton label="Cancelar" variant="secondary" @click="cancelRemove" />
+        <AppButton label="Remover" @click="confirmRemove" />
       </div>
     </div>
   </div>
@@ -72,9 +54,8 @@ const getProductTotal = (product: any) => {
       <span class="subtitle">Confira os itens antes de finalizar</span>
     </header>
 
-    <!-- PRODUCTS -->
     <div
-      v-for="(product, pIndex) in orderItems"
+      v-for="(product, pIndex) in orderStore.items"
       :key="pIndex"
       class="product-card"
     >
@@ -93,37 +74,34 @@ const getProductTotal = (product: any) => {
 
         <div class="option-values">
           <span class="quantity">x{{ option.quantity }}</span>
-          <span class="price"> R$ {{ option.totalPrice.toFixed(2) }} </span>
+          <span class="price">{{ formatCurrency(option.totalPrice) }}</span>
         </div>
       </div>
       <div class="product-total">
         <span>Subtotal</span>
-        <strong>R$ {{ getProductTotal(product).toFixed(2) }}</strong>
+        <strong>{{ formatCurrency(orderStore.productTotal(product)) }}</strong>
       </div>
       <div class="product-actions">
-        <PrimaryButton label="Editar" @click="editProduct(pIndex)" />
-        <SecondaryButton label="Remover" @click="openRemoveModal(pIndex)" />
+        <AppButton label="Editar" @click="editProduct(pIndex)" />
+        <AppButton
+          label="Remover"
+          variant="secondary"
+          @click="openRemoveModal(pIndex)"
+        />
       </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer v-if="orderItems.length" class="footer">
+    <footer v-if="orderStore.items.length" class="footer">
       <div class="total">
         <span>Total</span>
-        <strong>R$ {{ orderTotal.toFixed(2) }}</strong>
+        <strong>{{ formatCurrency(orderStore.total) }}</strong>
       </div>
 
       <div class="actions">
-        <PrimaryButton
-          @click="() => router.push({ name: 'checkout' })"
-          label="Finalizar Pedido"
-        />
+        <AppButton @click="goToCheckout" label="Finalizar Pedido" />
       </div>
     </footer>
-    <SecondaryButton
-      label="Voltar"
-      @click="() => router.push({ name: 'home' })"
-    />
+    <AppButton label="Voltar" variant="secondary" @click="goHome" />
   </div>
 </template>
 

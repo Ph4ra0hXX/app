@@ -1,5 +1,9 @@
 <template>
-  <div v-for="product in products" :key="product.id" class="container">
+  <div
+    v-for="product in productStore.products"
+    :key="product.id"
+    class="container"
+  >
     <div class="grid" @click="goToProduct(product.id)">
       <article class="card">
         <img class="card__image vert-move" :src="product.image" />
@@ -26,9 +30,8 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { useProductStore } from "@/stores";
-const productStore = useProductStore();
 
-const products = productStore.getAllProducts();
+const productStore = useProductStore();
 const router = useRouter();
 
 function goToProduct(id: number) {

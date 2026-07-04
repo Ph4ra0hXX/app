@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import FloatingCartButton from "@/components/layout/FloatingCartButton.vue";
+import FloatingCartButton from "@/components/FloatingCartButton.vue";
 import Logo from "@/components/Logo.vue";
 </script>
 

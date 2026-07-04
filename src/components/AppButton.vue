@@ -1,17 +1,23 @@
+<script setup lang="ts">
+withDefaults(
+  defineProps<{
+    label: string;
+    variant?: "primary" | "secondary";
+  }>(),
+  {
+    variant: "primary",
+  }
+);
+</script>
+
 <template>
-  <button class="btn-primary">
+  <button class="app-button" :class="variant">
     {{ label }}
   </button>
 </template>
 
-<script setup lang="ts">
-defineProps<{
-  label: string;
-}>();
-</script>
-
 <style scoped>
-.btn-primary {
+.app-button {
   margin-top: 15px;
   width: 100%;
   height: 40px;
@@ -24,9 +30,17 @@ defineProps<{
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.15s ease;
+}
 
+.primary {
   background: #fdd426;
   color: #000;
   border: none;
+}
+
+.secondary {
+  background: none;
+  color: #ffffff;
+  border: 1px solid #fdd426;
 }
 </style>

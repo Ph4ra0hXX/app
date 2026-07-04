@@ -1,48 +1,36 @@
 <template>
   <div
-    v-if="route.name !== 'order' && route.name !== 'checkout' && itemCount > 0"
+    v-if="showButton"
     class="floating-cart-btn"
     @click="goToOrder"
   >
     <div class="cart-circle">
       <i class="fa-solid fa-basket-shopping"></i>
-      <span class="cart-badge">{{ itemCount }}</span>
+      <span class="cart-badge">{{ orderStore.itemCount }}</span>
     </div>
-    <div class="cart-price-btn">R$: {{ currency(total) }}</div>
+    <div class="cart-price-btn">{{ formatCurrency(orderStore.total) }}</div>
   </div>
 </template>
 <script setup lang="ts">
 import { computed } from "vue";
 import { useOrderStore } from "@/stores";
 import { useRouter, useRoute } from "vue-router";
+import { formatCurrency } from "@/formatCurrency";
 
 const orderStore = useOrderStore();
 const router = useRouter();
 const route = useRoute();
+
 function goToOrder() {
   router.push({ name: "order" });
 }
 
-const total = computed(() => {
-  return orderStore.items.reduce((sum, item) => {
-    return (
-      sum +
-      item.options.reduce(
-        (optSum: any, opt: any) => optSum + (opt.totalPrice || 0),
-        0
-      )
-    );
-  }, 0);
-});
-
-const itemCount = computed(() => orderStore.items.length);
-
-function currency(value: any) {
-  return Number(value).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
+const showButton = computed(
+  () =>
+    route.name !== "order" &&
+    route.name !== "checkout" &&
+    orderStore.itemCount > 0
+);
 </script>
 
 <style scoped>

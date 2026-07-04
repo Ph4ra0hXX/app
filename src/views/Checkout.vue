@@ -1,30 +1,62 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useCustomerStore } from "@/stores";
-import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
-import SecondaryButton from "@/components/common/buttons/SecondaryButton.vue";
-import TextInput from "@/components/common/inputs/TextInput.vue";
+import AppButton from "@/components/AppButton.vue";
+import TextInput from "@/components/TextInput.vue";
 import { useRouter } from "vue-router";
 
 const customerStore = useCustomerStore();
 const customer = computed(() => customerStore.customer);
 const router = useRouter();
 
-const finalizarPedido = () => {
-  if (!customer.value.nome) return alert("Informe seu nome");
+const deliveryOptions = [
+  {
+    id: "buscar",
+    value: "Vou buscar",
+    label: "Vou buscar",
+    description: "grátis",
+  },
+  {
+    id: "entrega",
+    value: "Quero entrega",
+    label: "Quero entrega",
+    description: "taxa de entrega",
+  },
+];
+
+const paymentOptions = [
+  { id: "pix", value: "Pix", label: "PIX" },
+  { id: "cartao", value: "Cartão", label: "Cartão" },
+  { id: "dinheiro", value: "Dinheiro", label: "Dinheiro" },
+];
+
+const needsAddress = computed(
+  () => customer.value.formaDeEntrega === "Quero entrega"
+);
+
+const validateCustomer = () => {
+  if (!customer.value.nome) return "Informe seu nome";
   if (
-    customer.value.formaDeEntrega === "Quero entrega" &&
+    needsAddress.value &&
     (!customer.value.rua || !customer.value.numero)
   )
-    return alert("Informe o endereço completo");
+    return "Informe o endereço completo";
   if (!customer.value.formaDePagamento)
-    return alert("Escolha a forma de pagamento");
+    return "Escolha a forma de pagamento";
+  return "";
+};
+
+const finalizeOrder = () => {
+  const error = validateCustomer();
+  if (error) return alert(error);
   customerStore.finalizeCustomer();
 };
 
 const copyToClipboard = () => {
   navigator.clipboard.writeText("SUA_CHAVE_PIX_AQUI");
 };
+
+const goBack = () => router.push({ name: "order" });
 </script>
 
 <template>
@@ -37,45 +69,31 @@ const copyToClipboard = () => {
         </p>
       </div>
 
-      <!-- ENTREGA -->
       <div class="payment-container">
-        <div class="price-card">
+        <div
+          v-for="option in deliveryOptions"
+          :key="option.id"
+          class="price-card"
+        >
           <input
             v-model="customer.formaDeEntrega"
-            value="Vou buscar"
+            :value="option.value"
             type="radio"
-            id="buscar"
+            :id="option.id"
           />
           <div class="content">
-            Vou buscar
-            <span>grátis</span>
+            {{ option.label }}
+            <span>{{ option.description }}</span>
           </div>
-          <label for="buscar"></label>
-        </div>
-
-        <div class="price-card">
-          <input
-            v-model="customer.formaDeEntrega"
-            value="Quero entrega"
-            type="radio"
-            id="entrega"
-          />
-          <div class="content">
-            Quero entrega
-            <span>taxa de entrega</span>
-          </div>
-          <label for="entrega"></label>
+          <label :for="option.id"></label>
         </div>
       </div>
 
-      <!-- DADOS -->
       <div class="detail-info">
-        <!-- NOME -->
         <TextInput v-model="customer.nome" label="Seu Nome:" />
         <br />
 
-        <!-- ENDEREÇO -->
-        <div v-if="customer.formaDeEntrega === 'Quero entrega'">
+        <div v-if="needsAddress">
           <TextInput v-model="customer.rua" label="Rua:" />
           <br />
 
@@ -89,52 +107,35 @@ const copyToClipboard = () => {
           <br />
         </div>
 
-        <!-- PAGAMENTO -->
         <div class="info">
           <h3>Forma de Pagamento:</h3>
         </div>
 
         <div class="payment-container">
-          <div class="price-card">
+          <div
+            v-for="option in paymentOptions"
+            :key="option.id"
+            class="price-card"
+          >
             <input
               v-model="customer.formaDePagamento"
-              value="Pix"
+              :value="option.value"
               type="radio"
-              id="pix"
+              :id="option.id"
             />
-            <div class="content">PIX</div>
-            <label for="pix"></label>
-          </div>
-
-          <div class="price-card">
-            <input
-              v-model="customer.formaDePagamento"
-              value="Cartão"
-              type="radio"
-              id="cartao"
-            />
-            <div class="content">Cartão</div>
-            <label for="cartao"></label>
-          </div>
-
-          <div class="price-card">
-            <input
-              v-model="customer.formaDePagamento"
-              value="Dinheiro"
-              type="radio"
-              id="dinheiro"
-            />
-            <div class="content">Dinheiro</div>
-            <label for="dinheiro"></label>
+            <div class="content">{{ option.label }}</div>
+            <label :for="option.id"></label>
           </div>
         </div>
 
-        <!-- PIX -->
         <div v-if="customer.formaDePagamento === 'Pix'">
-          <SecondaryButton label="Copiar PIX" @click="copyToClipboard" />
+          <AppButton
+            label="Copiar PIX"
+            variant="secondary"
+            @click="copyToClipboard"
+          />
         </div>
 
-        <!-- TROCO -->
         <div v-if="customer.formaDePagamento === 'Dinheiro'">
           <TextInput
             v-model="customer.troco"
@@ -149,11 +150,8 @@ const copyToClipboard = () => {
           de R$ 4,00 será somado ao total.
         </p>
 
-        <PrimaryButton @click="finalizarPedido" label="Finalizar Pedido" />
-        <SecondaryButton
-          label="Voltar"
-          @click="() => router.push({ name: 'order' })"
-        />
+        <AppButton @click="finalizeOrder" label="Finalizar Pedido" />
+        <AppButton label="Voltar" variant="secondary" @click="goBack" />
       </div>
     </div>
   </div>

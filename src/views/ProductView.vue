@@ -1,23 +1,21 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute } from "vue-router";
-import {
-  useProductStore,
-  useOrderStore,
-  type OptionItem,
-  type Product,
-} from "@/stores";
-import PrimaryButton from "@/components/common/buttons/PrimaryButton.vue";
-import SecondaryButton from "@/components/common/buttons/SecondaryButton.vue";
-import router from "@/router";
-import { useToast } from "@/composables/useToast";
+import { useRoute, useRouter } from "vue-router";
+import { useProductStore, useOrderStore, type OptionItem } from "@/stores";
+import AppButton from "@/components/AppButton.vue";
+import { useToast } from "@/useToast";
+import { formatCurrency } from "@/formatCurrency";
 
 const route = useRoute();
+const router = useRouter();
 const productStore = useProductStore();
 const orderStore = useOrderStore();
 const { showToast } = useToast();
 
 const productId = Number(route.params.id);
+if (orderStore.editingProductIndex === null) {
+  productStore.resetProductOptions(productId);
+}
 
 const safeId = (value: string) =>
   value
@@ -42,16 +40,7 @@ const addToOrder = () => {
   router.push({ name: routeName });
 };
 
-const product = computed<Product | undefined>(() => {
-  const prod = productStore.getProductById(productId);
-  prod?.options.forEach((category) => {
-    category.items.forEach((item) => {
-      if (item.type === "checkbox" && item.obrigatory) item.checked = true;
-      else if (item.type === "quantity") item.quantity = item.quantity ?? 0;
-    });
-  });
-  return prod;
-});
+const product = computed(() => productStore.getProductById(productId));
 
 const increase = (item: OptionItem) => {
   if (item.type === "quantity" && (!item.max || item.quantity < item.max))
@@ -61,12 +50,6 @@ const increase = (item: OptionItem) => {
 const decrease = (item: OptionItem) => {
   if (item.type === "quantity" && item.quantity > 0) item.quantity--;
 };
-
-const formatPrice = (value: number) =>
-  new Intl.NumberFormat("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
 
 const goBack = () => {
   const isEditing = orderStore.editingProductIndex !== null;
@@ -94,7 +77,6 @@ const goBack = () => {
         :key="index"
         class="item-row"
       >
-        <!-- 🔹 ITEM COM QUANTIDADE -->
         <div v-if="item.type === 'quantity'">
           <button @click="decrease(item)" :disabled="item.quantity === 0">
             -
@@ -110,7 +92,6 @@ const goBack = () => {
           </button>
         </div>
 
-        <!-- 🔹 ITEM COM CHECKBOX -->
         <div v-else-if="item.type === 'checkbox'">
           <input
             type="checkbox"
@@ -120,7 +101,6 @@ const goBack = () => {
           />
         </div>
 
-        <!-- 🔹 NOME -->
         <label
           :for="`${safeId(category.categoryName)}-${safeId(item.name)}`"
           id="nomeItem"
@@ -128,8 +108,7 @@ const goBack = () => {
           {{ item.name }}
         </label>
 
-        <!-- 🔹 PREÇO -->
-        <label id="preco"> R$: {{ formatPrice(item.price) }} </label>
+        <label id="preco">{{ formatCurrency(item.price) }}</label>
 
         <br />
       </div>
@@ -137,8 +116,8 @@ const goBack = () => {
 
     <br />
 
-    <PrimaryButton @click="addToOrder" label="Salvar" />
-    <SecondaryButton @click="goBack()" label="Voltar" />
+    <AppButton @click="addToOrder" label="Salvar" />
+    <AppButton @click="goBack" label="Voltar" variant="secondary" />
   </div>
 </template>
 

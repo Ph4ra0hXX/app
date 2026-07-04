@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   label?: string;
-  modelValue: string | number;
+  modelValue: string | number | null;
   type?: string;
   placeholder?: string;
 }>();
@@ -18,7 +18,7 @@ defineEmits<{
     </div>
     <div class="input-field">
       <input
-        :value="modelValue"
+        :value="modelValue ?? ''"
         :type="type || 'text'"
         :placeholder="placeholder"
         @input="
