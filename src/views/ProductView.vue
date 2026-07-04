@@ -6,6 +6,7 @@ import {
   useProductStore,
   useOrderStore,
   type OptionItem,
+  type ProductOption,
 } from "@/stores";
 import AppButton from "@/components/AppButton.vue";
 import { useToast } from "@/useToast";
@@ -54,8 +55,89 @@ const addToOrder = () => {
 
 const product = computed(() => productStore.getProductById(productId));
 
-const increase = (item: OptionItem) => {
-  if (item.type === "quantity" && (!item.max || item.quantity < item.max))
+const getSelectedItemsCount = (category: ProductOption) =>
+  category.items.reduce((count, item) => {
+    if (item.type === "checkbox") {
+      return count + Number(item.checked || item.obrigatory);
+    }
+
+    return count + item.quantity;
+  }, 0);
+
+const hasReachedCategoryLimit = (category: ProductOption) =>
+  category.maxItems !== undefined &&
+  getSelectedItemsCount(category) >= category.maxItems;
+
+const hasObrigatoryCheckbox = (category: ProductOption) =>
+  category.items.some((item) => item.type === "checkbox" && item.obrigatory);
+
+const isCheckboxDisabled = (item: OptionItem, category: ProductOption) =>
+  item.type !== "checkbox" ||
+  item.obrigatory ||
+  (!item.checked &&
+    hasReachedCategoryLimit(category) &&
+    (category.maxItems !== 1 || hasObrigatoryCheckbox(category)));
+
+const isQuantityIncreaseDisabled = (
+  item: OptionItem,
+  category: ProductOption
+) =>
+  item.type !== "quantity" ||
+  Boolean(item.max && item.quantity >= item.max) ||
+  hasReachedCategoryLimit(category);
+
+const toggleCheckbox = (
+  item: OptionItem,
+  category: ProductOption,
+  event: Event
+) => {
+  if (item.type !== "checkbox" || item.obrigatory) return;
+
+  const checkbox = event.target as HTMLInputElement;
+
+  if (!checkbox.checked) {
+    item.checked = false;
+    return;
+  }
+
+  if (category.maxItems === 1) {
+    category.items.forEach((categoryItem) => {
+      if (
+        categoryItem.type === "checkbox" &&
+        !categoryItem.obrigatory &&
+        categoryItem !== item
+      ) {
+        categoryItem.checked = false;
+      }
+    });
+
+    if (hasReachedCategoryLimit(category)) {
+      checkbox.checked = false;
+      showToast(
+        `Você só pode selecionar 1 item em ${category.categoryName}.`,
+        "error"
+      );
+      return;
+    }
+
+    item.checked = true;
+    return;
+  }
+
+  if (hasReachedCategoryLimit(category)) {
+    checkbox.checked = false;
+    showToast(
+      `Você só pode selecionar ${category.maxItems} itens em ${category.categoryName}.`,
+      "error"
+    );
+    return;
+  }
+
+  item.checked = true;
+};
+
+const increase = (item: OptionItem, category: ProductOption) => {
+  if (item.type === "quantity" && !isQuantityIncreaseDisabled(item, category))
     item.quantity++;
 };
 
@@ -97,8 +179,8 @@ const goBack = () => {
           <span id="quantidadeDiv">{{ item.quantity }}</span>
 
           <button
-            @click="increase(item)"
-            :disabled="Boolean(item.max && item.quantity === item.max)"
+            @click="increase(item, category)"
+            :disabled="isQuantityIncreaseDisabled(item, category)"
           >
             +
           </button>
@@ -107,8 +189,9 @@ const goBack = () => {
         <div v-else-if="item.type === 'checkbox'">
           <input
             type="checkbox"
-            v-model="item.checked"
-            :disabled="item.obrigatory"
+            :checked="item.checked"
+            @change="toggleCheckbox(item, category, $event)"
+            :disabled="isCheckboxDisabled(item, category)"
             :id="`${safeId(category.categoryName)}-${safeId(item.name)}`"
           />
         </div>

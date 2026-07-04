@@ -23,6 +23,7 @@ export type OptionItem = CheckboxItem | QuantityItem;
 export interface ProductOption {
   categoryName: string;
   items: OptionItem[];
+  maxItems?: number;
   obrigatory?: boolean;
 }
 
@@ -117,6 +118,7 @@ export const useProductStore = defineStore("product", {
         options: [
           {
             categoryName: "Pão",
+            maxItems: 1,
             items: [
               {
                 name: "Pão Árabe",
