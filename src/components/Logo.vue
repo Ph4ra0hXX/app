@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { RouterLink } from "vue-router";
+
 defineOptions({
   name: "logoUrl",
 });
@@ -11,7 +13,9 @@ defineProps<{
 
 <template>
   <div class="container">
-    <img :src="url" :alt="alt ?? 'Logo'" class="logo" />
+    <RouterLink to="/" class="logo-link" aria-label="Ir para a pagina inicial">
+      <img :src="url" :alt="alt ?? 'Logo'" class="logo" />
+    </RouterLink>
   </div>
 </template>
 
@@ -22,6 +26,11 @@ defineProps<{
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.logo-link {
+  display: inline-flex;
+  cursor: pointer;
 }
 
 .logo {
